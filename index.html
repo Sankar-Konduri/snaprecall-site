@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnapRecall — Find any screenshot, instantly</title>
+  <meta name="description" content="Press Alt+S. Type what you remember. Get the screenshot. SnapRecall searches your screenshots by meaning, not filename. Fully local, one-time purchase." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f0f0f;
+      --surface:   #171717;
+      --border:    #252525;
+      --accent:    #6C63FF;
+      --accent-dim:#3d3880;
+      --text:      #e8e6ff;
+      --muted:     #888;
+      --faint:     #333;
+      --mono:      'JetBrains Mono', monospace;
+      --sans:      'Inter', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── layout ── */
+    .wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── nav ── */
+    nav {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    nav .wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 15px;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-price {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .nav-price strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* ── hero ── */
+    .hero {
+      padding: 80px 0 64px;
+    }
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero-headline {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 600;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+    .hero-headline em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .hero-sub {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 48px;
+      max-width: 560px;
+    }
+
+    /* ── interactive search demo ── */
+    .search-demo {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .search-icon {
+      color: var(--accent);
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .search-input-fake {
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--text);
+      flex: 1;
+      min-height: 20px;
+    }
+    .search-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 14px;
+      background: var(--accent);
+      vertical-align: middle;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .search-examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 48px;
+    }
+    .search-example {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+    .search-example:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    /* ── cta ── */
+    .cta-group {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .btn-buy {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--sans);
+      font-size: 15px;
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 7px;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-buy:hover { background: #7c74ff; transform: translateY(-1px); }
+    .btn-buy:active { transform: translateY(0); }
+    .btn-price {
+      font-weight: 400;
+      opacity: 0.85;
+      font-size: 13px;
+    }
+    .cta-note {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .cta-note span {
+      display: block;
+    }
+
+    /* ── divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 64px 0;
+    }
+
+    /* ── screenshots ── */
+    .screenshots {
+      margin-bottom: 64px;
+    }
+    .section-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .screenshot-slot {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .screenshot-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+      display: block;
+    }
+    .screenshot-slot .placeholder-text {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--faint);
+    }
+    .screenshot-caption {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    /* ── how it works ── */
+    .how {
+      margin-bottom: 64px;
+    }
+    .how h2 {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 32px;
+      color: var(--text);
+    }
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      gap: 0 16px;
+      padding-bottom: 32px;
+      position: relative;
+    }
+    .step:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 28px;
+      bottom: 0;
+      width: 1px;
+      background: var(--border);
+    }
+    .step-num {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--accent);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .step-body { padding-top: 8px; }
+    .step-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .step-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .step-desc code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    /* ── what you can search ── */
+    .searches {
+      margin-bottom: 64px;
+    }
+    .searches h2 {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .searches-sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .search-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 520px) {
+      .search-grid { grid-template-columns: 1fr; }
+    }
+    .search-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .search-card-label {
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+    .search-card-queries {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .search-card-query {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text);
+      padding: 5px 8px;
+      background: var(--bg);
+      border-radius: 4px;
+      border-left: 2px solid var(--accent-dim);
+    }
+
+    /* ── local-first block ── */
+    .local {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 32px;
+      margin-bottom: 64px;
+    }
+    .local h2 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+    .local-points {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .local-points li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .local-points li::before {
+      content: '✓';
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 13px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .local-points li strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* ── pricing ── */
+    .pricing {
+      margin-bottom: 64px;
+      text-align: center;
+    }
+    .pricing-box {
+      display: inline-block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 40px 48px;
+      min-width: 280px;
+    }
+    .pricing-amount {
+      font-size: 48px;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .pricing-amount sup {
+      font-size: 22px;
+      vertical-align: super;
+      font-weight: 400;
+    }
+    .pricing-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .pricing-features {
+      list-style: none;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .pricing-features li {
+      font-size: 14px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pricing-features li::before {
+      content: '—';
+      color: var(--accent);
+      font-family: var(--mono);
+    }
+    .pricing-features li strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+    .btn-buy-large {
+      display: block;
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 13px 24px;
+      border-radius: 7px;
+      text-decoration: none;
+      text-align: center;
+      transition: background 0.15s;
+    }
+    .btn-buy-large:hover { background: #7c74ff; }
+    .pricing-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 14px;
+    }
+
+    /* ── requirements ── */
+    .requirements {
+      margin-bottom: 64px;
+    }
+    .requirements h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .req-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .req-list li {
+      font-size: 14px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+    .req-list li::before {
+      content: '→  ';
+      color: var(--faint);
+    }
+
+    /* ── footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+    }
+    footer .wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-logo {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .footer-logo span { color: var(--accent); }
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+    .footer-links a {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: var(--text); }
+    .privacy {
+      font-size: 12px;
+      color: var(--faint);
+      line-height: 1.7;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .privacy a {
+      color: var(--muted);
+      text-decoration: underline;
+    }
+
+    /* ── responsive ── */
+    @media (max-width: 600px) {
+      .hero { padding: 56px 0 48px; }
+      .pricing-box { padding: 32px 24px; min-width: unset; width: 100%; }
+      .local { padding: 24px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .search-cursor { animation: none; opacity: 1; }
+      .btn-buy:hover { transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- nav -->
+<nav>
+  <div class="wrap">
+    <a href="/" class="nav-logo">Snap<span>Recall</span></a>
+    <span class="nav-price"><strong>$1.99</strong> — one-time</span>
+  </div>
+</nav>
+
+<!-- hero -->
+<section class="hero">
+  <div class="wrap">
+    <p class="hero-eyebrow">Windows desktop utility</p>
+    <h1 class="hero-headline">
+      Find any screenshot<br />
+      by <em>what you remember</em>
+    </h1>
+    <p class="hero-sub">
+      Press <strong style="color:var(--text);font-weight:500">Alt+S</strong> from any app.
+      Type what you remember about the screenshot — a name, a topic, a moment.
+      SnapRecall finds it. Copy and move on.
+    </p>
+
+    <!-- interactive search demo -->
+    <div class="search-demo">
+      <span class="search-icon">⌕</span>
+      <div class="search-input-fake" id="search-display">
+        <span id="search-text"></span><span class="search-cursor"></span>
+      </div>
+    </div>
+    <div class="search-examples">
+      <span class="search-example" onclick="typeQuery(this)" data-query="breakup chat with monica">breakup chat with monica</span>
+      <span class="search-example" onclick="typeQuery(this)" data-query="bar graph study results">bar graph study results</span>
+      <span class="search-example" onclick="typeQuery(this)" data-query="invoice april total due">invoice april total due</span>
+      <span class="search-example" onclick="typeQuery(this)" data-query="pip install error">pip install error</span>
+      <span class="search-example" onclick="typeQuery(this)" data-query="yesterday">yesterday</span>
+      <span class="search-example" onclick="typeQuery(this)" data-query="terminal output deploy">terminal output deploy</span>
+      <span class="search-example" onclick="typeQuery(this)" data-query="notes from last week">notes from last week</span>
+      <span class="search-example" onclick="typeQuery(this)" data-query="authentication bug fix">authentication bug fix</span>
+    </div>
+
+    <div class="cta-group">
+      <a href="https://buy.dodopayments.com/PLACEHOLDER" class="btn-buy" id="buy-btn">
+        Get SnapRecall
+        <span class="btn-price">$1.99</span>
+      </a>
+      <span class="cta-note">
+        <span>Windows 10 / 11 · 64-bit</span>
+        <span>~250 MB installer · models download on first run</span>
+      </span>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- screenshots -->
+<section class="screenshots">
+  <div class="wrap">
+    <p class="section-label">The interface</p>
+
+    <div class="screenshot-slot" id="ss1">
+      <!-- replace src with your actual screenshot -->
+      <img src="screenshots/overlay.png" alt="SnapRecall overlay showing search results" />
+
+    </div>
+    <p class="screenshot-caption">The overlay appears near your cursor. Search, copy, gone.</p>
+
+    <div class="screenshot-slot" id="ss2">
+      <img src="screenshots/preview.png" alt="Double-click to preview a screenshot before copying" />
+      
+    </div>
+    <p class="screenshot-caption">Double-click any result to preview it at full size before copying.</p>
+
+    <div class="screenshot-slot" id="ss3">
+      <img src="screenshots/settings.png" alt="Settings — add watched folders" />
+      
+    </div>
+    <p class="screenshot-caption">Point SnapRecall at any folder. It watches for new screenshots automatically.</p>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- how it works -->
+<section class="how">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Choose a folder to watch</div>
+          <div class="step-desc">Tell SnapRecall where your screenshots live. It scans the folder and indexes everything — extracting text, understanding meaning. New screenshots are picked up automatically.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Press <code>Alt+S</code> from anywhere</div>
+          <div class="step-desc">Works in any app — browser, Word, Slack, VS Code, anywhere. The overlay appears near your cursor without disrupting what you're doing.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Type what you remember</div>
+          <div class="step-desc">Not just filenames. Type the topic, the person, the date, deatil you remember. SnapRecall understands meaning — it finds screenshots that match your intent, not just your exact words.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">Copy and move on</div>
+          <div class="step-desc">Press <code>Enter</code> or click. The image is on your clipboard. The overlay closes. You're back where you were.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- what you can search -->
+<section class="searches">
+  <div class="wrap">
+    <h2>Search by anything you remember</h2>
+    <p class="searches-sub">SnapRecall works for general use and technical work equally.</p>
+    <div class="search-grid">
+      <div class="search-card">
+        <div class="search-card-label">Everyday</div>
+        <div class="search-card-queries">
+          <div class="search-card-query">breakup chat with monica</div>
+          <div class="search-card-query">invoice april</div>
+          <div class="search-card-query">notes from yesterday</div>
+          <div class="search-card-query">article about sleep</div>
+          <div class="search-card-query">book passage stoicism</div>
+        </div>
+      </div>
+      <div class="search-card">
+        <div class="search-card-label">Technical</div>
+        <div class="search-card-queries">
+          <div class="search-card-query">pip install error torch</div>
+          <div class="search-card-query">authentication bug fix</div>
+          <div class="search-card-query">terminal deploy output</div>
+          <div class="search-card-query">typescript type error</div>
+          <div class="search-card-query">bar graph study results</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- local first -->
+<section>
+  <div class="wrap">
+    <div class="local">
+      <h2>Everything stays on your machine</h2>
+      <ul class="local-points">
+        <li><strong>No cloud uploads.</strong> Your screenshots never leave your computer.</li>
+        <li><strong>No account required.</strong> No sign-up, no login, no email confirmation.</li>
+        <li><strong>Fully offline after setup.</strong> AI models download once on first launch, then run offline-locally forever.</li>
+        <li><strong>No telemetry.</strong> SnapRecall does not collect usage data, crash reports, or analytics of any kind.</li>
+        <li><strong>No subscription.</strong> Pay once. Own it. Use it as long as you want.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- pricing -->
+<section class="pricing">
+  <div class="wrap">
+    <div class="pricing-box">
+      <div class="pricing-amount"><sup>$</sup>1.99</div>
+      <div class="pricing-desc">one-time purchase — no subscription</div>
+      <ul class="pricing-features">
+        <li><strong>Unlimited</strong> screenshots indexed</li>
+        <li><strong>Semantic search</strong> — finds meaning, not just keywords</li>
+        <li><strong>Instant</strong> hotkey access from any app</li>
+        <li><strong>Fully local</strong> — no internet needed after setup</li>
+        <li><strong>Windows 10 / 11</strong> — 64-bit</li>
+      </ul>
+      <a href="https://buy.dodopayments.com/PLACEHOLDER" class="btn-buy-large" id="buy-btn-2">
+        Buy SnapRecall — $1.99
+      </a>
+      <p class="pricing-note">Secure checkout via Dodo Payments. Download link sent after purchase.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- requirements -->
+<section class="requirements">
+  <div class="wrap">
+    <h2>System requirements</h2>
+    <ul class="req-list">
+      <li>Windows 10 or Windows 11 (64-bit)</li>
+      <li>~250 MB disk space for the installer</li>
+      <li>~200 MB additional for AI models (downloaded once on first run)</li>
+      <li>4 GB RAM minimum, 8 GB recommended</li>
+      <li>Internet connection for first launch only</li>
+    </ul>
+  </div>
+</section>
+
+<!-- footer -->
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <a href="/" class="footer-logo">Snap<span>Recall</span></a>
+      <div class="footer-links">
+        <a href="mailto:snaprecalldev@gmail.com">Contact</a>
+        <a href="https://github.com/Sankar-Konduri/snaprecall-releases/releases">Releases</a>
+        <a href="#privacy">Privacy</a>
+      </div>
+    </div>
+    <div class="privacy" id="privacy">
+      <strong style="color:var(--muted)">Privacy Policy</strong> — Last updated June 2026.<br /><br />
+      SnapRecall is a fully offline desktop application. It does not collect, transmit, or store any personal data on external servers. All screenshot processing — including OCR text extraction, semantic embeddings, and search indexes — happens locally on your computer. No image, text, or metadata ever leaves your device.<br /><br />
+      We do not collect usage analytics, crash reports, or telemetry of any kind. We do not require account creation.<br /><br />
+      The application downloads AI models from public repositories (HuggingFace, EasyOCR) on first launch. These are one-time downloads. After that, the application operates entirely without internet access.<br /><br />
+      Purchases are processed by <a href="https://dodopayments.com" target="_blank">Dodo Payments</a>. Their privacy policy governs any data you provide during checkout. We do not receive or store your payment information.<br /><br />
+      Questions: <a href="mailto:snaprecalldev@gmail.com">snaprecalldev@gmail.com</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // typing animation for search demo
+  let currentTimer = null;
+
+  function typeQuery(el) {
+    const query = el.dataset.query;
+    const display = document.getElementById('search-text');
+
+    if (currentTimer) clearTimeout(currentTimer);
+    display.textContent = '';
+
+    let i = 0;
+    function type() {
+      if (i < query.length) {
+        display.textContent += query[i];
+        i++;
+        currentTimer = setTimeout(type, 45 + Math.random() * 30);
+      }
+    }
+    type();
+  }
+
+  // auto-cycle through examples on load
+  const examples = document.querySelectorAll('.search-example');
+  let exampleIndex = 0;
+
+  function cycleExample() {
+    typeQuery(examples[exampleIndex]);
+    exampleIndex = (exampleIndex + 1) % examples.length;
+  }
+
+  cycleExample();
+  setInterval(cycleExample, 3200);
+</script>
+
+</body>
+</html>

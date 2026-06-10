@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Download SnapRecall — Thank you</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #0f0f0f;
+      --surface: #171717;
+      --border:  #252525;
+      --accent:  #6C63FF;
+      --text:    #e8e6ff;
+      --muted:   #888;
+      --mono:    'JetBrains Mono', monospace;
+      --sans:    'Inter', system-ui, sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 48px 40px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+    }
+    .check {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #1a1a2e;
+      border: 1px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 22px;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+    .sub {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.15s;
+      margin-bottom: 14px;
+    }
+    .download-btn:hover { background: #7c74ff; }
+    .download-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+    .steps-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+    .install-steps {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+    .install-step {
+      display: flex;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .install-step-num {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+      flex-shrink: 0;
+      width: 18px;
+      margin-top: 2px;
+    }
+    .install-step strong { color: var(--text); font-weight: 500; }
+    .install-step code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .back {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .back:hover { color: var(--text); }
+    @media (max-width: 560px) {
+      .card { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="check">✓</div>
+    <h1>You're all set</h1>
+    <p class="sub">Thank you for purchasing SnapRecall. Your download is ready.</p>
+
+    <a
+      href="https://github.com/Sankar-Konduri/snaprecall-releases/releases/latest/download/SnapRecall_Setup_v0.1.0.exe"
+      class="download-btn"
+      id="dl-btn"
+    >
+      ↓ &nbsp;Download SnapRecall v0.1.0
+    </a>
+    <p class="download-note">Windows 10 / 11 · 64-bit · ~500 MB installer</p>
+
+    <p class="steps-label">After downloading</p>
+    <div class="install-steps">
+      <div class="install-step">
+        <span class="install-step-num">1.</span>
+        <span>Run <strong>SnapRecall_Setup_v0.1.0.exe</strong> and follow the installer.</span>
+      </div>
+      <div class="install-step">
+        <span class="install-step-num">2.</span>
+        <span>SnapRecall starts in your system tray. On first launch it one time downloads the components required for text recognition and search — this takes a minute and happens once only.</span>
+      </div>
+      <div class="install-step">
+        <span class="install-step-num">3.</span>
+        <span>Open Settings from the tray icon and add a folder to watch.</span>
+      </div>
+      <div class="install-step">
+        <span class="install-step-num">4.</span>
+        <span>Press <code>Alt+S</code> from any app to start searching.</span>
+      </div>
+    </div>
+
+    <a href="/" class="back">← Back to snaprecall</a>
+  </div>
+</body>
+</html>
